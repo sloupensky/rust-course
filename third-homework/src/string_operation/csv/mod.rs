@@ -51,7 +51,7 @@ impl Csv {
         let mut string: String = "".to_string();
 
         for _item in &self.header.columns {
-            let _ = &string.push_str( "  {:>}  ");
+            let _ = &string.push_str( "  {:<}  ");
         }
 
         string
