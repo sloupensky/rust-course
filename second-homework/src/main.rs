@@ -21,7 +21,7 @@ fn main() {
             "There is only one allowed argument, you entered {}",
             args.len() - 1
         );
-    } else if args.len() == 2 && args[1].is_empty() {
+    } else if args.len() < 2 || args[1].is_empty() {
         panic!("Argument cannot be empty");
     } else {
         println!("Entered cli argument {}", args[1])
