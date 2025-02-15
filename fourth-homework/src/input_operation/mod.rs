@@ -8,7 +8,7 @@ pub struct InputOperation {
 }
 
 
-pub enum InteractiveMode {
+enum InteractiveMode {
     FullyInteractive,
     TypeProvided,
     NonInteractive,
