@@ -1,0 +1,12 @@
+[package]
+name = "fifth-homework"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+flume = "0.11.1"
+log = {  version = "0.4.26", features = ["max_level_info"] }
+env_logger = "0.11.6"
+message_utils = { path = "./shared/message_uitls", version = "0.1.0"}
+input_utils = { path = "./shared/input_utils", version = "0.1.0"}
+file_utils = { path = "./shared/file_utils", version = "0.1.0"}
