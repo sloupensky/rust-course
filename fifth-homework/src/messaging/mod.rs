@@ -9,6 +9,8 @@ use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::path::Path;
 use std::{fs, thread};
+use crate::{file, input};
+use crate::input::InputOperationType;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Message {
@@ -18,7 +20,7 @@ pub enum Message {
 }
 
 pub fn start_server(address: &str) -> Result<(), Box<dyn Error>> {
-    let listener = TcpListener::bind(address).unwrap();
+    let listener = TcpListener::bind(address)?;
     let mut clients: HashMap<SocketAddr, TcpStream> = HashMap::new();
     
     println!("Starting server on {}", address);
@@ -32,7 +34,7 @@ pub fn start_server(address: &str) -> Result<(), Box<dyn Error>> {
 
         thread::Builder::new()
             .name(format!("server-thread-{}", clients.len()))
-            .spawn(move || match handle_client(stream) {
+            .spawn(move || match handle_client_by_server(stream) {
                 Ok(_) => (),
                 Err(e) => {
                     eprintln!("Error when handling client {}", e)
@@ -43,12 +45,35 @@ pub fn start_server(address: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn get_client(address: &str) -> Result<TcpStream, Box<dyn Error>> {
+pub fn handle_client(tx: Sender<Result<String, String>>, address: String) -> Result<(), Box<dyn Error>> {
+    let client = match get_client(address.as_str()) {
+        Ok(client) => client,
+        Err(e) => {
+            return Err(e);
+        }
+    };
+    let operation_result = input::get_operation_type();
+
+    match operation_result {
+        Ok(operation_type) => {
+            let message = get_message_by_operation_type(operation_type)?;
+            handle_message(tx, client.try_clone().unwrap())?;
+            send_message(client, &message)?;
+
+            Ok(())
+        },
+        Err(error) => {
+            Err(error)
+        }
+    }
+}
+
+fn get_client(address: &str) -> Result<TcpStream, Box<dyn Error>> {
     let stream = TcpStream::connect(address)?;
 
     Ok(stream)
 }
-pub fn handle_message(
+fn handle_message(
     tx: Sender<Result<String, String>>,
     stream: TcpStream,
 ) -> Result<(), Box<dyn Error>> {
@@ -136,7 +161,7 @@ fn read_message(mut stream: &TcpStream) -> Result<Message, Box<dyn Error>> {
     Ok(serialized_message)
 }
 
-fn handle_client(stream: TcpStream) -> Result<(), Box<dyn Error>> {
+fn handle_client_by_server(stream: TcpStream) -> Result<(), Box<dyn Error>> {
     let message = read_message(&stream)?;
     println!("Received message");
 
@@ -144,4 +169,22 @@ fn handle_client(stream: TcpStream) -> Result<(), Box<dyn Error>> {
     println!("Sending message to clients");
 
     Ok(())
+}
+
+fn get_message_by_operation_type(operation_type: InputOperationType) -> Result<Message, Box<dyn Error>> {
+    match operation_type.operation {
+        input::Operation::Image => {
+            Ok(Message::Image(operation_type.data.clone(), file::read_file_to_vec(&operation_type.data).unwrap()))
+        }
+        input::Operation::File => {
+            Ok(Message::File(operation_type.data.clone(), file::read_file_to_vec(&operation_type.data).unwrap()))
+        }
+        input::Operation::Text => {
+            Ok(Message::Text(operation_type.data.clone()))
+        }
+        input::Operation::Quit => {
+            println!("Exiting...");
+            std::process::exit(1);
+        }
+    }
 }
