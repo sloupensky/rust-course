@@ -1,0 +1,9 @@
+[package]
+name = "file_utils"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+image = "0.25.5"
+chrono = "0.4.39"
+thiserror = "2.0.12"
