@@ -1,18 +1,47 @@
 use anyhow::{anyhow, Context, Result};
 use file_utils;
-use flume::Sender;
+use flume::{Sender, Receiver};
 use input_utils;
 use input_utils::InputOperationType;
-use log::{info};
+use log::{error, info};
 use message_utils;
 use message_utils::Message; 
-use tokio::net::TcpStream; 
+use tokio::net::TcpStream;
 
-pub async fn handle_client(tx: Sender<Result<String, String>>, address: String) -> Result<()> {
+pub async fn handle_client_by_mode(tx: Sender<Result<String, String>>,rx: Receiver<Result<String, String>>, address: String) -> Result<()> {
+    match handle_communication(tx, address).await {
+        Ok(_) => {
+            while let Ok(message_result) = rx.recv() {
+                handle_message_result(message_result).await?
+            }
+        },
+        Err(error) => {
+            error!("{:?}", error);
+        }
+    }
+
+    Ok(())
+}
+
+async fn handle_message_result(message_result: Result<String, String>) -> Result<()> {
+    match message_result {
+        Ok(message) => {
+            info!("{:?}", message);
+            info!("Message processed, exiting ...");
+        },
+        Err(e) => {
+            error!("Error {:?}", e);
+            error!("Message wasn't processed, exiting ...");
+        }
+    }
+    
+    Ok(())
+}
+async fn handle_communication(tx: Sender<Result<String, String>>, address: String) -> Result<()> {
     if let Err(e) = is_valid_user() {
         return Err(anyhow!("{}", e));
     }
-    
+
     let operation_type = input_utils::get_operation_type()?;
     
     let message = get_message_by_operation_type(operation_type)?;
@@ -82,8 +111,8 @@ fn get_message_by_operation_type(operation_type: InputOperationType) -> Result<M
 
 fn is_valid_user() -> Result<bool> {
     let user = input_utils::get_user()?;
-    
+
     data_utils::get_user_by_name(user).context("Nonexistent user")?;
-    
+
     Ok(true)
 }

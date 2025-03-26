@@ -1,13 +1,14 @@
 use flume;
 use input_utils;
 use log::{error, info};
+use crate::client::handle_client_by_mode;
 
 mod client;
 mod server;
 
 #[tokio::main]
 async fn main()  {
-    init_logger(); 
+    init_logger();
 
     let Ok(address) = input_utils::get_address() else {
         error!("Invalid address!");
@@ -17,24 +18,8 @@ async fn main()  {
 
     match input_utils::get_mode() {
         Ok(input_utils::Mode::Client) => {
-            match client::handle_client(tx, address).await {
-                Ok(_) => {
-                    while let Ok(message_result) = rx.recv() {
-                        match message_result {
-                            Ok(message) => {
-                                info!("{:?}", message);
-                                info!("Message processed, exiting ...");
-                            },
-                            Err(e) => {
-                                error!("Error {:?}", e);
-                                error!("Message wasn't processed, exiting ...");
-                            }
-                        }
-                    }
-                },
-                Err(error) => {
-                    error!("{:?}", error);
-                }
+            if let Err(e) = handle_client_by_mode(tx, rx, address).await {
+                error!("Error {:?}", e);
             }
         },
         Ok(input_utils::Mode::Server) => {
