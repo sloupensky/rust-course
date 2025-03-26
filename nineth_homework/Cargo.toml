@@ -1,0 +1,18 @@
+[package]
+name = "nineth-homework"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+flume = "0.11.1"
+log = {  version = "0.4.26", features = ["max_level_info"] }
+env_logger = "0.11.6"
+message_utils = { path = "./shared/message_utils", version = "0.1.0"}
+input_utils = { path = "./shared/input_utils", version = "0.1.0"}
+file_utils = { path = "./shared/file_utils", version = "0.1.0"}
+data_utils = { path = "./shared/data_utils", version = "0.1.0"}
+anyhow = "1.0.97"
+tokio = { version = "1.44.1", features = ["full"] }
+
+[workspace]
+members = ["./shared/message_utils", "./shared/input_utils", "./shared/file_utils", "./shared/data_utils"]
