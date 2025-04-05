@@ -1,0 +1,78 @@
+{% extends "partials/base" %}
+
+{% block title %}Homepage{% endblock title %}
+
+{% block content %}
+<h1>Description</h1>
+<p>
+    This program is used for sending and processing messages of file, image and text.
+    It has two modes in which it can be started - client and server.
+</p>
+
+<h1>Setup</h1>
+<p>
+    You need to install diesel and diesel_cli:
+    <code>cargo install diesel_cli</code>,<br>
+    then copy <code>.env.dist</code> to <code>.env</code> and set your database.<br>
+    You need to have sqlite3 installed (it's located in <code>./data/database.sqlite</code>), for Ubuntu:
+    <code>sudo apt-get install sqlite3 libsqlite3-dev</code><br>
+    Then run <code>diesel migration run</code> – you will then have a test user for using with the application.<br>
+    Migrations are located in <code>./migrations/</code> folder.
+</p>
+
+<h2>Usage</h2>
+<p>
+    The program can be started in two versions: client and server.<br>
+    For communication, you need to start the server first and then the client.<br>
+    For both versions (client/server), you need to provide the IP on which the server/client will be listening for
+    connections.<br>
+    The program provides logging with the <code>log</code> crate, which outputs colored information into the CLI.<br>
+    You can control log output by setting the <code>RUST_LOG</code> environment variable (e.g. to <code>debug</code>,
+    which is also the default).
+</p>
+
+<h2>Client</h2>
+<p>
+    After starting the client, you will be asked to provide the server IP and port (default is
+    <code>localhost:111</code>).<br>
+    Then you need to provide a correct user from the database. There is a user called <strong>test</strong>.<br>
+    Then you can select which type of message you want to send:
+</p>
+<ul>
+    <li><strong>image</strong> – You will be asked for the path to any image. The image will be sent to the server, then
+        processed by clients, and saved into the <code>./images/</code> folder.
+    </li>
+    <li><strong>file</strong> – You will be asked for the path to any file. The file will be sent through the server and
+        back to all clients, and then saved into the <code>./files/</code> folder.
+    </li>
+    <li><strong>text</strong> – You can enter any text and it will be sent to all clients and then printed as output.
+    </li>
+    <li><strong>quit</strong> – This will exit the program.</li>
+</ul>
+
+<h2>Server</h2>
+<p>
+    After starting the server, you need to provide the IP and port (default is <code>localhost:111</code>), and then the
+    server will be ready to listen for all connections.
+</p>
+
+<h2>Web server</h2>
+<p>
+    To set up the web server, just copy <code>Rocket.toml.dist</code> to <code>Rocket.toml</code> and run the
+    application in <code>web</code> mode.
+</p>
+
+<h2>Testing</h2>
+<p>
+    You can run all tests for all workspaces using <code>cargo test --workspace</code>.<br>
+    But first, you need to set up your database – see section <strong>Setup</strong>.
+</p>
+
+<h2>Export documentation</h2>
+<p>
+    You can export source code documentation by running:<br>
+    <code>cargo doc --open --no-deps --workspace</code><br>
+    You should find the docs at <code>./target/doc/help.html</code> where you can search for any function/crate/etc., or
+    explore <code>./target/doc/*</code> for a specific library.
+</p>
+{% endblock content %}

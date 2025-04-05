@@ -1,0 +1,7 @@
+.idea
+target
+files/*.*
+images/*.png
+!.gitkeep
+.env
+Rocket.toml

@@ -1,0 +1,7 @@
+{% extends "partials/base" %}
+
+{% block title %}User deleted{% endblock title %}
+
+{% block content %}
+    <h1>User deleted</h1> 
+{% endblock content %}
