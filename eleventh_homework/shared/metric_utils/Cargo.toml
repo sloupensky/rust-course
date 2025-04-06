@@ -1,0 +1,9 @@
+[package]
+name = "metric_utils"
+version = "0.1.0"
+authors = ["Michal Sloupenský <sloupensky@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+prometheus = "0.14.0"
+thiserror = "2.0.12"
